@@ -8,7 +8,6 @@ cp -avf "/ctx/system_files"/. /
 FEDORA_VERSION="$(rpm -E %fedora)"
 BUILD_TMP="$(mktemp -d /var/tmp/amp-build.XXXXXX)"
 trap 'rm -rf "${BUILD_TMP}"' EXIT
-install -d /usr/local/bin
 
 ### Repositories
 #
@@ -73,7 +72,7 @@ curl -fL --retry 3 --retry-delay 5 \
     "${ANDROID_STUDIO_URL}"
 echo "${ANDROID_STUDIO_SHA256}  ${BUILD_TMP}/android-studio.tar.gz" | sha256sum -c -
 tar -xzf "${BUILD_TMP}/android-studio.tar.gz" -C /opt
-ln -sfn /opt/android-studio/bin/studio.sh /usr/local/bin/android-studio
+ln -sfn /opt/android-studio/bin/studio.sh /usr/bin/android-studio
 rm -f "${BUILD_TMP}/android-studio.tar.gz"
 
 ### OpenCode 2 (stable channel, pinned)
@@ -81,7 +80,7 @@ OPENCODE_VERSION="2.2.0"
 mkdir -p /root
 HOME=/root curl -fsSL https://opencode.ai/v2/install | \
     HOME=/root bash -s -- --version "${OPENCODE_VERSION}" --no-modify-path
-install -Dm0755 /root/.opencode/bin/opencode /usr/local/bin/opencode
+install -Dm0755 /root/.opencode/bin/opencode /usr/bin/opencode
 rm -rf /root/.opencode
 
 ### T3 Code CLI (stable channel, pinned)
@@ -95,7 +94,7 @@ env HOME=/root \
     T3CODE_CHANNEL=stable \
     T3CODE_VERSION="${T3CODE_VERSION}" \
     T3CODE_HOME=/usr/share/t3code \
-    T3CODE_INSTALL_BIN_DIR=/usr/local/bin \
+    T3CODE_INSTALL_BIN_DIR=/usr/bin \
     sh "${BUILD_TMP}/t3-install.sh"
 
 ### System units
@@ -106,8 +105,8 @@ systemctl enable podman.socket
 rpm -q nvidia-driver kmod-nvidia libva-nvidia-driver
 rpm -q ffmpeg gstreamer1-plugin-libav gstreamer1-plugins-bad gstreamer1-plugins-ugly-free
 test -x /opt/android-studio/bin/studio.sh
-test -x /usr/local/bin/opencode
-test -x /usr/local/bin/t3
+test -x /usr/bin/opencode
+test -x /usr/bin/t3
 opencode --version
 t3 --help >/dev/null
 
