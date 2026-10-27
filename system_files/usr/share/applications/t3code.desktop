@@ -1,0 +1,12 @@
+[Desktop Entry]
+Version=1.0
+Type=Application
+Name=T3 Code
+GenericName=Agent Harness
+Comment=Control local coding agents from the T3 Code web UI
+Exec=/usr/local/bin/t3
+Icon=utilities-terminal
+Terminal=true
+StartupNotify=true
+Categories=Development;
+Keywords=AI;Agent;Coding;T3;

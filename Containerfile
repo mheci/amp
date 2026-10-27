@@ -3,33 +3,22 @@ FROM scratch AS ctx
 COPY build_files /
 COPY system_files /system_files
 
-# Base Image
-FROM ghcr.io/ublue-os/bazzite:stable
-## Other possible base images include:
-# FROM ghcr.io/ublue-os/bazzite:testing
-# FROM ghcr.io/ublue-os/aurora:stable
-# FROM ghcr.io/ublue-os/bluefin-nvidia-open:stable
-# 
-# ... and so on, here are more base images
-# Universal Blue Images: https://github.com/orgs/ublue-os/packages
-# Fedora base image: quay.io/fedora/fedora-bootc:44
-# CentOS base images: quay.io/centos-bootc/centos-bootc:stream10
+# Base image: Universal Blue Kinoite with the open NVIDIA kernel modules.
+#
+# `kinoite-nvidia:stable` is a stale 2023 tag, so this intentionally tracks
+# `latest` (currently Fedora 44). The ublue `nvidia` variant is built with
+# `akmods-nvidia-open`; see:
+# https://github.com/ublue-os/main/blob/main/Containerfile
+FROM ghcr.io/ublue-os/kinoite-nvidia:latest
 
 ### [IM]MUTABLE /opt
-## Some bootable images, like Fedora, have /opt symlinked to /var/opt, in order to
-## make it mutable/writable for users. However, some packages write files to this directory,
-## thus its contents might be wiped out when bootc deploys an image, making it troublesome for
-## some packages. Eg, google-chrome, docker-desktop.
-##
-## Uncomment the following line if one desires to make /opt immutable and be able to be used
-## by the package manager.
-
-# RUN rm /opt && mkdir /opt
+## Fedora Atomic points /opt at /var/opt. Android Studio must live in an
+## immutable, image-managed location, so replace the symlink with a real
+## directory before the build script runs.
+RUN if [ -L /opt ]; then rm /opt; fi && mkdir -p /opt
 
 ### MODIFICATIONS
-## make modifications desired in your image and install packages by modifying the build.sh script
-## the following RUN directive does all the things required to run "build.sh" as recommended.
-
+## Image customizations live in build_files/build.sh.
 RUN --mount=type=bind,from=ctx,source=/,target=/ctx \
     --mount=type=cache,dst=/var/cache \
     --mount=type=cache,dst=/var/log \
