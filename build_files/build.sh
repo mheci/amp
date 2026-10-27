@@ -109,8 +109,8 @@ rpm -q ffmpeg gstreamer1-plugin-libav gstreamer1-plugins-bad gstreamer1-plugins-
 test -x /opt/android-studio/bin/studio.sh
 test -x /usr/bin/opencode
 test -x /usr/bin/t3
-opencode --version
-t3 --help >/dev/null
+HOME="${OPENCODE_HOME}" opencode --version
+HOME="${T3CODE_BUILD_HOME}" t3 --help >/dev/null
 
 ### Cleanup
 dnf5 clean all
