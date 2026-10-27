@@ -77,11 +77,11 @@ rm -f "${BUILD_TMP}/android-studio.tar.gz"
 
 ### OpenCode 2 (stable channel, pinned)
 OPENCODE_VERSION="2.2.0"
-mkdir -p /root
-HOME=/root curl -fsSL https://opencode.ai/v2/install | \
-    HOME=/root bash -s -- --version "${OPENCODE_VERSION}" --no-modify-path
-install -Dm0755 /root/.opencode/bin/opencode /usr/bin/opencode
-rm -rf /root/.opencode
+OPENCODE_HOME="${BUILD_TMP}/opencode-home"
+mkdir -p "${OPENCODE_HOME}"
+HOME="${OPENCODE_HOME}" curl -fsSL https://opencode.ai/v2/install | \
+    HOME="${OPENCODE_HOME}" bash -s -- --version "${OPENCODE_VERSION}" --no-modify-path
+install -Dm0755 "${OPENCODE_HOME}/.opencode/bin/opencode" /usr/bin/opencode
 
 ### T3 Code CLI (stable channel, pinned)
 #
@@ -89,8 +89,10 @@ rm -rf /root/.opencode
 # `t3` launcher on PATH. The desktop UI is served by `t3`; use the desktop
 # entry in system_files to launch it from KDE.
 T3CODE_VERSION="0.1.3"
+T3CODE_BUILD_HOME="${BUILD_TMP}/t3-home"
+mkdir -p "${T3CODE_BUILD_HOME}"
 curl -fsSL -o "${BUILD_TMP}/t3-install.sh" https://t3.codes/install.sh
-env HOME=/root \
+env HOME="${T3CODE_BUILD_HOME}" \
     T3CODE_CHANNEL=stable \
     T3CODE_VERSION="${T3CODE_VERSION}" \
     T3CODE_HOME=/usr/share/t3code \
