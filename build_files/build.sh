@@ -8,13 +8,15 @@ cp -avf "/ctx/system_files"/. /
 FEDORA_VERSION="$(rpm -E %fedora)"
 BUILD_TMP="$(mktemp -d /var/tmp/amp-build.XXXXXX)"
 trap 'rm -rf "${BUILD_TMP}"' EXIT
+install -d /usr/local/bin
 
 ### Repositories
 #
 # Terra: main repo plus extras. The terra-nvidia, terra-mesa, and
 # terra-multimedia subrepos are intentionally NOT enabled:
 #   - ublue already ships the open NVIDIA driver and a full Mesa build
-#   - RPM Fusion is the multimedia source for this image
+#   - ublue already ships the complete codec stack; RPM Fusion adds H.264
+#     pieces and other packages without replacing that stack
 # Enabling those subrepos would fight the ublue NVIDIA stack.
 dnf5 install -y --nogpgcheck \
     --repofrompath 'terra,https://repos.fyralabs.com/terra$releasever' \
@@ -37,25 +39,23 @@ dnf5 config-manager setopt fedora-cisco-openh264.enabled=1
 
 ### Multimedia codecs
 #
-# ublue already ships a full ffmpeg build from negativo17. Keep that full
-# build and add the RPM Fusion GStreamer plugins/codecs that are not part of
-# the base image. We deliberately do not install libavcodec-freeworld: it is
-# only a complement to ffmpeg-free, and this image uses full ffmpeg.
+# ublue already ships a complete codec stack from negativo17, including full
+# ffmpeg, gstreamer1-plugins-bad, gstreamer1-plugin-libav, and Mesa with
+# codecs. Do not layer RPM Fusion's gstreamer1-plugins-bad-freeworld on top:
+# it is built against a different x265 soname and would force a downgrade of
+# the working ublue stack. Keep the ublue stack, enable RPM Fusion for other
+# packages, and add only the non-conflicting H.264/GStreamer pieces.
 if rpm -q ffmpeg-free >/dev/null 2>&1; then
     dnf5 swap -y ffmpeg-free ffmpeg --allowerasing
 fi
 
-dnf5 install -y --allowerasing --setopt=install_weak_deps=False \
+dnf5 install -y --setopt=install_weak_deps=False \
     ffmpeg \
-    gstreamer1-plugins-good \
-    gstreamer1-plugins-good-extras \
-    gstreamer1-plugins-bad-free \
-    gstreamer1-plugins-bad-free-extras \
-    gstreamer1-plugins-bad-freeworld \
-    gstreamer1-plugins-ugly \
-    gstreamer1-libav \
     gstreamer1-plugin-openh264 \
-    mozilla-openh264
+    mozilla-openh264 \
+    gstreamer1-plugins-good-extras \
+    gstreamer1-plugins-bad-free-extras \
+    gstreamer1-plugins-ugly-free
 
 ### Android tooling
 #
@@ -104,7 +104,7 @@ systemctl enable podman.socket
 ### Assertions
 # Fail the build immediately if a requested component did not land.
 rpm -q nvidia-driver kmod-nvidia libva-nvidia-driver
-rpm -q ffmpeg gstreamer1-plugins-ugly gstreamer1-libav
+rpm -q ffmpeg gstreamer1-plugin-libav gstreamer1-plugins-bad gstreamer1-plugins-ugly-free
 test -x /opt/android-studio/bin/studio.sh
 test -x /usr/local/bin/opencode
 test -x /usr/local/bin/t3

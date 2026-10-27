@@ -20,7 +20,7 @@ ghcr.io/ublue-os/kinoite-nvidia:latest
 - Open NVIDIA kernel modules, `nvidia-container-toolkit`, `supergfxctl`, and VA-API bridging.
 - **Terra** package repository (main and extras). The Terra `nvidia`, `mesa`, and `multimedia` subrepos are intentionally not enabled because they would conflict with the ublue NVIDIA stack and RPM Fusion.
 - **RPM Fusion** free and nonfree repositories, enabled.
-- Full multimedia stack: full `ffmpeg`, GStreamer good/bad/ugly/libav plugins, OpenH264 for GStreamer and Firefox, with `fedora-cisco-openh264` enabled.
+- Full multimedia stack: UBlue's negativo17 full `ffmpeg`, GStreamer bad/libav codecs, plus the Fedora `ugly-free` set, OpenH264 for GStreamer and Firefox, with `fedora-cisco-openh264` enabled. RPM Fusion's `-freeworld` GStreamer packages are intentionally not layered over the UBlue stack because they conflict on the x265 soname.
 - **Android Studio** `2026.2.1.8` (Rabbit 1) from Google's official Linux archive, plus `android-tools` (adb/fastboot) and desktop integration.
 - **OpenCode** 2.x stable, pinned to `2.2.0`, installed as `opencode`.
 - **T3 Code** stable CLI, pinned to `0.1.3`, installed as `t3` with a KDE launcher that opens its local web UI.
